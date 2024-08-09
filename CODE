@@ -1,0 +1,211 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
+
+class User {
+    String username;
+    String password;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+class UserRegistration {
+    HashMap<String, User> users = new HashMap<>();
+
+    public boolean register(String username, String password) {
+        if (users.containsKey(username)) {
+            return false; // User already exists
+        }
+        users.put(username, new User(username, password));
+        return true;
+    }
+
+    public boolean login(String username, String password) {
+        if (users.containsKey(username) && users.get(username).password.equals(password)) {
+            return true;
+        }
+        return false;
+    }
+}
+
+class Movie {
+    String title;
+    String showtime;
+    String theater;
+
+    public Movie(String title, String showtime, String theater) {
+        this.title = title;
+        this.showtime = showtime;
+        this.theater = theater;
+    }
+}
+
+class MovieListings {
+    List<Movie> movies = new ArrayList<>();
+
+    public void addMovie(String title, String showtime, String theater) {
+        movies.add(new Movie(title, showtime, theater));
+    }
+
+    public void displayMovies() {
+        for (Movie movie : movies) {
+            System.out.println("Title: " + movie.title + ", Showtime: " + movie.showtime + ", Theater: " + movie.theater);
+        }
+    }
+}
+
+class SeatSelection {
+    int[][] seats = new int[5][5]; // Simple 5x5 grid of seats
+
+    public void displaySeats() {
+        for (int i = 0; i < seats.length; i++) {
+            for (int j = 0; j < seats[i].length; j++) {
+                System.out.print(seats[i][j] == 0 ? "[ ]" : "[X]");
+            }
+            System.out.println();
+        }
+    }
+
+    public boolean selectSeat(int row, int col) {
+        if (seats[row][col] == 0) {
+            seats[row][col] = 1; // Seat is now booked
+            return true;
+        }
+        return false;
+    }
+}
+
+class PaymentProcessing {
+    public boolean processPayment(double amount) {
+        // Dummy implementation of payment processing
+        System.out.println("Processing payment of $" + amount);
+        return true;
+    }
+}
+
+class Booking {
+    String movieTitle;
+    String showtime;
+    String theater;
+    List<String> seats;
+
+    public Booking(String movieTitle, String showtime, String theater, List<String> seats) {
+        this.movieTitle = movieTitle;
+        this.showtime = showtime;
+        this.theater = theater;
+        this.seats = seats;
+    }
+}
+
+class BookingHistory {
+    List<Booking> bookings = new ArrayList<>();
+
+    public void addBooking(Booking booking) {
+        bookings.add(booking);
+    }
+
+    public void displayHistory() {
+        for (Booking booking : bookings) {
+            System.out.println("Movie: " + booking.movieTitle + ", Showtime: " + booking.showtime + ", Theater: " + booking.theater);
+            System.out.println("Seats: " + String.join(", ", booking.seats));
+        }
+    }
+}
+
+class AdminDashboard {
+    MovieListings movieListings;
+
+    public AdminDashboard(MovieListings movieListings) {
+        this.movieListings = movieListings;
+    }
+
+    public void addMovie(String title, String showtime, String theater) {
+        movieListings.addMovie(title, showtime, theater);
+    }
+
+    public void manageBookings(BookingHistory bookingHistory) {
+        bookingHistory.displayHistory();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        UserRegistration userRegistration = new UserRegistration();
+        MovieListings movieListings = new MovieListings();
+        SeatSelection seatSelection = new SeatSelection();
+        PaymentProcessing paymentProcessing = new PaymentProcessing();
+        BookingHistory bookingHistory = new BookingHistory();
+        AdminDashboard adminDashboard = new AdminDashboard(movieListings);
+
+        // Dummy Data
+        adminDashboard.addMovie("Inception", "7:00 PM", "Theater 1");
+        adminDashboard.addMovie("The Matrix", "9:00 PM", "Theater 2");
+
+        System.out.println("Welcome to the Movie Ticket Booking System");
+        while (true) {
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Admin Login");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            if (choice == 1) {
+                System.out.print("Enter username: ");
+                String username = scanner.nextLine();
+                System.out.print("Enter password: ");
+                String password = scanner.nextLine();
+                if (userRegistration.register(username, password)) {
+                    System.out.println("Registration successful!");
+                } else {
+                    System.out.println("User already exists!");
+                }
+            } else if (choice == 2) {
+                System.out.print("Enter username: ");
+                String username = scanner.nextLine();
+                System.out.print("Enter password: ");
+                String password = scanner.nextLine();
+                if (userRegistration.login(username, password)) {
+                    System.out.println("Login successful!");
+                    // Display movie listings
+                    movieListings.displayMovies();
+                    System.out.println("Select a movie by entering the title:");
+                    String selectedMovieTitle = scanner.nextLine();
+
+                    System.out.println("Select seat (row and column): ");
+                    int row = scanner.nextInt();
+                    int col = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+
+                    if (seatSelection.selectSeat(row, col)) {
+                        System.out.println("Seat selected successfully.");
+                        System.out.print("Enter payment amount: ");
+                        double amount = scanner.nextDouble();
+                        scanner.nextLine(); // Consume newline
+
+                        if (paymentProcessing.processPayment(amount)) {
+                            List<String> selectedSeats = new ArrayList<>();
+                            selectedSeats.add(row + "," + col);
+                            bookingHistory.addBooking(new Booking(selectedMovieTitle, "Selected Time", "Selected Theater", selectedSeats));
+                            System.out.println("Booking successful!");
+                        } else {
+                            System.out.println("Payment failed!");
+                        }
+                    } else {
+                        System.out.println("Seat already booked!");
+                    }
+                } else {
+                    System.out.println("Invalid credentials!");
+                }
+            } else if (choice == 3) {
+                System.out.println("Admin Dashboard");
+                // Display and manage bookings
+                adminDashboard.manageBookings(bookingHistory);
+            }
+        }
+    }
+}
